@@ -38,9 +38,13 @@ async def main() -> None:
     for model_id in ids:
         print(f"  - {model_id}")
 
-    # Chat: try candidates in preference order until one answers.
+    # Chat: pinned config model first, then preference order.
     chat_model = None
-    for candidate in _pick(ids, CHAT_PREFERENCES):
+    candidates = _pick(ids, CHAT_PREFERENCES)
+    if config.CHAT_MODEL in candidates:
+        candidates.remove(config.CHAT_MODEL)
+        candidates.insert(0, config.CHAT_MODEL)
+    for candidate in candidates:
         if any(hint in candidate.lower() for hint in EMBED_HINTS):
             continue
         try:
@@ -71,7 +75,26 @@ async def main() -> None:
     if not embedding_model:
         print("embeddings unavailable — BM25-only mode")
 
-    print(f"\nRecord in config.py -> CHAT_MODEL = \"{chat_model}\", EMBEDDING_MODEL = {embedding_model!r}")
+    # VultronRetriever models are served as rerankers (POST /v1/rerank).
+    rerank_model = None
+    for candidate in embed_candidates:
+        try:
+            ranked = await vultr_client.rerank(
+                "physical therapy dates", ["PT ran 2026-03-14 to 2026-04-30", "patient enjoys gardening"],
+                model=candidate,
+            )
+            print(f"Rerank OK on '{candidate}': top index {ranked[0][0]} score {ranked[0][1]:.3f}")
+            rerank_model = candidate
+            break
+        except VultrInferenceError as exc:
+            print(f"Rerank failed on '{candidate}': {exc}")
+    if not rerank_model:
+        print("rerank unavailable — pure BM25 ordering")
+
+    print(
+        f"\nRecord in config.py -> CHAT_MODEL = \"{chat_model}\", "
+        f"EMBEDDING_MODEL = {embedding_model!r}, RERANK_MODEL = {rerank_model!r}"
+    )
 
 
 if __name__ == "__main__":

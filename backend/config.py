@@ -14,9 +14,22 @@ VULTR_INFERENCE_BASE_URL: str = os.getenv(
     "VULTR_INFERENCE_BASE_URL", "https://api.vultrinference.com/v1"
 ).rstrip("/")
 
-# Confirmed by backend/smoke.py in Phase 0.
-CHAT_MODEL: str = ""
+# Confirmed by backend/smoke.py in Phase 0 (2026-07-04).
+# Endpoint serves 13 models; both Nemotron models return clean JSON.
+# Cascade chosen over Nano-Omni-Reasoning: same quality on extraction,
+# slightly faster, no reasoning-mode token risk in a deterministic demo.
+CHAT_MODEL: str = "nvidia/Nemotron-Cascade-2-30B-A3B"
+
+# POST /v1/embeddings is not served (404) — embeddings stay off unless
+# Vultr exposes them later; retrieval must work BM25-only regardless.
 EMBEDDING_MODEL: str | None = None
+EMBEDDINGS_ENABLED: bool = False
+
+# VultronRetriever models ARE served, as rerankers via POST /v1/rerank.
+# Retrieval uses BM25 candidates + VultronRetriever rerank when enabled;
+# disabling this flag falls back to pure BM25 ordering.
+RERANK_MODEL: str = "vultr/VultronRetrieverPrime-Qwen3.5-8B"
+RERANK_ENABLED: bool = True
 
 TEMPERATURE: float = 0.2
 REQUEST_TIMEOUT_SECONDS: float = 60.0

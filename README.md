@@ -7,8 +7,9 @@ criterion, calls deterministic tools for date math and code checks, and
 produces either a filing-ready appeal letter with pinpoint citations or an
 honest "this case is weak, here's what to obtain first" report.
 
-Built for the RAISE Summit Hackathon 2026 (Vultr track). All inference runs on
-Vultr Serverless Inference. All data is synthetic.
+Built for the RAISE Summit Hackathon 2026 (Vultr track). Planning, reasoning,
+and retrieval orchestration run entirely on Vultr Serverless Inference. All
+data is synthetic.
 
 *Full README coming in Phase 6.*
 

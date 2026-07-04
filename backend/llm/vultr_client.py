@@ -78,6 +78,22 @@ async def chat(
     return data["choices"][0]["message"]["content"]
 
 
+async def rerank(query: str, documents: list[str], model: str | None = None) -> list[tuple[int, float]]:
+    """Scores documents against the query via POST /v1/rerank.
+
+    Returns (original_index, relevance_score) pairs sorted most-relevant
+    first. Callers fall back to BM25 ordering on VultrInferenceError.
+    """
+    payload = {
+        "model": model or config.RERANK_MODEL,
+        "query": query,
+        "documents": documents,
+    }
+    data = await _request("POST", "/rerank", json=payload)
+    results = sorted(data["results"], key=lambda r: r["relevance_score"], reverse=True)
+    return [(r["index"], r["relevance_score"]) for r in results]
+
+
 async def embed(texts: list[str], model: str | None = None) -> list[list[float]]:
     """Returns one embedding vector per input text.
 
