@@ -91,13 +91,30 @@ class RetrievalIndex:
 
     def __init__(self) -> None:
         self.chunks: list[Chunk] = []
+        self.documents: dict[str, dict] = {}
         manifest = json.loads((config.CORPUS_DIR / "manifest.json").read_text())
         for doc in manifest["documents"]:
             markdown = (config.CORPUS_DIR / doc["file"]).read_text()
+            self.documents[doc["doc_id"]] = {**doc, "markdown": markdown}
             self.chunks.extend(
                 _split_document(doc["doc_id"], doc["title"], doc["doc_type"], doc["case"], markdown)
             )
         logger.info("Retrieval index built: %d chunks from %d documents", len(self.chunks), len(manifest["documents"]))
+
+    def get_document(self, doc_id: str) -> dict | None:
+        """Full record for one document (title, markdown, metadata)."""
+        return self.documents.get(doc_id)
+
+    def load_text(self, doc_types: list[str], case: str) -> str:
+        """Concatenated full markdown of the matching documents, banner
+        stripped. Used for INGEST (denial letter) and policy decomposition,
+        where the agent needs the whole document rather than ranked chunks."""
+        parts = [
+            _BANNER_RE.sub("", d["markdown"]).strip()
+            for d in self.documents.values()
+            if d["doc_type"] in doc_types and d["case"] in (case, "shared")
+        ]
+        return "\n\n".join(parts)
 
     def _filter(self, doc_types: list[str] | None, case: str) -> list[Chunk]:
         return [

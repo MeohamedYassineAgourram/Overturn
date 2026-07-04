@@ -73,9 +73,12 @@ async def chat(
         "messages": messages,
         "temperature": config.TEMPERATURE if temperature is None else temperature,
         "max_tokens": max_tokens,
+        "reasoning_effort": config.REASONING_EFFORT,
     }
     data = await _request("POST", "/chat/completions", json=payload)
-    return data["choices"][0]["message"]["content"]
+    message = data["choices"][0]["message"]
+    # Guard: reasoning models may leave `content` null and put text in `reasoning`.
+    return message.get("content") or message.get("reasoning") or ""
 
 
 async def rerank(query: str, documents: list[str], model: str | None = None) -> list[tuple[int, float]]:

@@ -32,6 +32,9 @@ RERANK_MODEL: str = "vultr/VultronRetrieverPrime-Qwen3.5-8B"
 RERANK_ENABLED: bool = True
 
 TEMPERATURE: float = 0.2
+# Nemotron-Cascade is a reasoning model; "none" disables the thinking phase so
+# it emits the answer directly — faster, cheaper, and deterministic for a demo.
+REASONING_EFFORT: str = "none"
 REQUEST_TIMEOUT_SECONDS: float = 60.0
 MAX_RETRIES: int = 3
 
