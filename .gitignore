@@ -5,3 +5,8 @@ __pycache__/
 dist/
 .venv/
 .DS_Store
+
+# TS composite build outputs
+*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
