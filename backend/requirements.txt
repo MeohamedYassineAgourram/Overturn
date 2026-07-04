@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+httpx
+pydantic
+rank-bm25
+numpy
+python-dotenv
+sse-starlette
