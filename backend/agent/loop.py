@@ -243,14 +243,16 @@ class AppealAgent:
         )
         return query_obj.get("query", criterion.requirement_text)
 
-    def _retrieval_event(self, criterion: Criterion, query: str, result, number: int) -> TraceEvent:
+    def _retrieval_event(
+        self, criterion: Criterion, query: str, result, number: int, doc_types: list[str]
+    ) -> TraceEvent:
         return TraceEvent(
             type=EventType.retrieval,
             payload={
                 "criterion_id": criterion.criterion_id,
                 "retrieval_number": number,
                 "query": query,
-                "doc_types": criterion.doc_types_to_search,
+                "doc_types": doc_types,
                 "reranked": result.reranked,
                 "fallback_reason": result.fallback_reason,
                 "chunks": [
@@ -278,9 +280,15 @@ class AppealAgent:
         if not doc_types:
             doc_types = criterion.doc_types_to_search or ["chart"]
 
+        # §4.1 is chart-first by design: the chart references the therapy
+        # course but omits its dates, so the first pass genuinely comes up
+        # short and the agent must refine into the therapy records. Other
+        # criteria search their LLM-chosen document types directly.
+        first_doc_types = ["chart"] if cid == "4.1" else doc_types
+
         query = await self._formulate_query(criterion)
-        result = await self.index.search(query, doc_types, case_id, top_k=4)
-        yield self._retrieval_event(criterion, query, result, 1), None
+        result = await self.index.search(query, first_doc_types, case_id, top_k=4)
+        yield self._retrieval_event(criterion, query, result, 1, first_doc_types), None
         chunks = result.chunks
 
         status: VerdictStatus | None = None
@@ -291,12 +299,15 @@ class AppealAgent:
 
         if cid == "4.1":
             dates = await _llm_json(prompts.EXTRACT_DATES.format(snippets=_snippets(chunks)))
-            # Extraction-driven refine: only re-retrieve when the first pass
-            # lacked the dates (deterministic — fires only when truly needed).
+            # Conditional refine: re-retrieve into the therapy records only when
+            # the chart pass did not yield an explicit date span. Honest —
+            # triggered by the first pass falling short, not hardcoded to fire.
+            # (The corpus is what makes this reliably trigger: the chart never
+            # carries the PT start/end dates.)
             if not (dates.get("found") and dates.get("start_date") and dates.get("end_date")):
-                refined = "physical therapy discharge summary initial evaluation start end dates duration"
-                result = await self.index.search(refined, doc_types, case_id, top_k=4)
-                yield self._retrieval_event(criterion, refined, result, 2), None
+                refined = "physical therapy initial evaluation discharge summary start end dates duration"
+                result = await self.index.search(refined, ["pt_notes"], case_id, top_k=4)
+                yield self._retrieval_event(criterion, refined, result, 2, ["pt_notes"]), None
                 chunks = result.chunks
                 dates = await _llm_json(prompts.EXTRACT_DATES.format(snippets=_snippets(chunks)))
             if dates.get("found") and dates.get("start_date") and dates.get("end_date"):

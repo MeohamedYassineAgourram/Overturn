@@ -62,7 +62,9 @@ Evidence needed: {evidence_needed}
 Write a single focused search query (keywords, not a question) to find the records that would satisfy or refute this criterion. Return ONLY a JSON object: {{"query": string}}."""
 
 # --- Step 3b: targeted extraction for tool inputs ------------------------
-EXTRACT_DATES = """From the passages below, extract the start and end dates of the patient's provider-directed conservative therapy (e.g. the physical-therapy course): the earliest treatment/evaluation date and the final discharge/last-session date.
+EXTRACT_DATES = """From the passages below, extract the start and end dates of the patient's provider-directed conservative therapy course (the physical-therapy course): the initial evaluation / first treatment date and the discharge / final session date.
+
+Report found=true ONLY if BOTH the therapy start date and the therapy end date are explicitly stated in the passages. Do NOT infer a span from referral dates, medication order dates, or office-visit dates, and do NOT guess. If either the start or the end date of the therapy course is not explicitly present, return found=false with nulls.
 
 PASSAGES:
 {snippets}
