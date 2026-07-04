@@ -49,7 +49,17 @@ export default function App() {
 
     for (const t of EVENT_TYPES) {
       es.addEventListener(t, (e) => {
-        const payload = JSON.parse((e as MessageEvent).data);
+        // The "error" listener also receives EventSource's native connection
+        // error, which carries no data — ignore those here (onerror handles
+        // them) and guard against any malformed payload.
+        const raw = (e as MessageEvent).data;
+        if (raw == null) return;
+        let payload: any;
+        try {
+          payload = JSON.parse(raw);
+        } catch {
+          return;
+        }
         dispatch({ type: "event", event: { type: t, payload } });
         setTick((n) => n + 1);
         if (t === "done" || t === "error") {
