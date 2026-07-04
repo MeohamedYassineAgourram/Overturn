@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { findQuoteRange } from "../highlight";
+import DocumentArtifact from "./DocumentArtifact";
 
 interface Props {
   docId: string | null;
@@ -7,10 +7,16 @@ interface Props {
   onClose: () => void;
 }
 
+interface DocData {
+  title: string;
+  markdown: string;
+  doc_type: string;
+}
+
 export default function CitationDrawer({ docId, quote, onClose }: Props) {
-  const [doc, setDoc] = useState<{ title: string; markdown: string } | null>(null);
+  const [doc, setDoc] = useState<DocData | null>(null);
   const [loading, setLoading] = useState(false);
-  const markRef = useRef<HTMLElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!docId) return;
@@ -18,13 +24,18 @@ export default function CitationDrawer({ docId, quote, onClose }: Props) {
     setDoc(null);
     fetch(`/api/document/${docId}`)
       .then((r) => r.json())
-      .then((d) => setDoc({ title: d.title, markdown: d.markdown }))
+      .then((d) => setDoc({ title: d.title, markdown: d.markdown, doc_type: d.doc_type }))
       .catch(() => setDoc(null))
       .finally(() => setLoading(false));
   }, [docId]);
 
   useEffect(() => {
-    if (markRef.current) markRef.current.scrollIntoView({ block: "center", behavior: "smooth" });
+    if (!doc) return;
+    // Scroll the highlighted passage into view once rendered.
+    const t = setTimeout(() => {
+      scrollRef.current?.querySelector("#cited-mark")?.scrollIntoView({ block: "center", behavior: "smooth" });
+    }, 60);
+    return () => clearTimeout(t);
   }, [doc, quote]);
 
   useEffect(() => {
@@ -34,25 +45,6 @@ export default function CitationDrawer({ docId, quote, onClose }: Props) {
   }, [onClose]);
 
   if (!docId) return null;
-
-  let body: React.ReactNode = null;
-  if (doc) {
-    const range = findQuoteRange(doc.markdown, quote);
-    if (range) {
-      const [s, e] = range;
-      body = (
-        <>
-          {doc.markdown.slice(0, s)}
-          <mark ref={markRef} className="rounded bg-accent/40 px-0.5 text-white ring-1 ring-accent/60">
-            {doc.markdown.slice(s, e)}
-          </mark>
-          {doc.markdown.slice(e)}
-        </>
-      );
-    } else {
-      body = doc.markdown;
-    }
-  }
 
   return (
     <div className="fixed inset-0 z-40 flex justify-end">
@@ -70,17 +62,13 @@ export default function CitationDrawer({ docId, quote, onClose }: Props) {
             Close ✕
           </button>
         </header>
-        <div className="mb-3 border-b border-slate-800 px-5 py-2.5">
+        <div className="border-b border-slate-800 px-5 py-2.5">
           <div className="text-[11px] uppercase tracking-wider text-slate-500">Cited passage</div>
           <p className="mt-1 text-xs italic text-accent/90">“{quote}”</p>
         </div>
-        <div className="flex-1 overflow-auto px-5 pb-6">
+        <div ref={scrollRef} className="flex-1 overflow-auto bg-slate-950/40 px-5 py-5">
           {loading && <div className="text-sm text-slate-500">Loading document…</div>}
-          {doc && (
-            <pre className="whitespace-pre-wrap break-words font-mono text-[12.5px] leading-relaxed text-slate-300">
-              {body}
-            </pre>
-          )}
+          {doc && <DocumentArtifact docType={doc.doc_type} markdown={doc.markdown} quote={quote} />}
         </div>
       </aside>
     </div>
