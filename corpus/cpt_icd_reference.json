@@ -1,0 +1,14 @@
+{
+  "72148": {
+    "description": "MRI lumbar spine w/o contrast",
+    "consistent_icd10": ["M54.16", "M54.17", "M51.26", "M48.06"]
+  },
+  "72149": {
+    "description": "MRI lumbar spine with contrast",
+    "consistent_icd10": ["M54.16", "M54.17", "M51.26", "M48.06", "M46.26"]
+  },
+  "72158": {
+    "description": "MRI lumbar spine w/o and with contrast",
+    "consistent_icd10": ["M54.16", "M54.17", "M51.26", "M48.06", "M46.26"]
+  }
+}

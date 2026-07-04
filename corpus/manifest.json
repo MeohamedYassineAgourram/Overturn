@@ -1,0 +1,60 @@
+{
+  "documents": [
+    {
+      "doc_id": "policy_mp142",
+      "title": "Meridian Health Plans Medical Policy MP-142 — MRI of the Lumbar Spine",
+      "doc_type": "policy",
+      "case": "shared",
+      "file": "policy_MP-142_lumbar_mri.md"
+    },
+    {
+      "doc_id": "denial_letter_A",
+      "title": "Notice of Adverse Benefit Determination — Callahan, Claim MH-2026-48213",
+      "doc_type": "denial_letter",
+      "case": "A",
+      "file": "denial_letter_case_A.md"
+    },
+    {
+      "doc_id": "chart_A",
+      "title": "Patient Chart — Robert Callahan (Aldrich Spine & Orthopedic Associates)",
+      "doc_type": "chart",
+      "case": "A",
+      "file": "chart_case_A.md"
+    },
+    {
+      "doc_id": "pt_notes_A",
+      "title": "Riverside Physical Therapy — Treatment Record, Robert Callahan",
+      "doc_type": "pt_notes",
+      "case": "A",
+      "file": "pt_notes_case_A.md"
+    },
+    {
+      "doc_id": "radiology_log_A",
+      "title": "Imaging History — Robert Callahan (Harborview Diagnostic Imaging Network)",
+      "doc_type": "radiology_log",
+      "case": "A",
+      "file": "radiology_log_case_A.md"
+    },
+    {
+      "doc_id": "denial_letter_B",
+      "title": "Notice of Adverse Benefit Determination — Mercer, Claim MH-2026-51877",
+      "doc_type": "denial_letter",
+      "case": "B",
+      "file": "denial_letter_case_B.md"
+    },
+    {
+      "doc_id": "chart_B",
+      "title": "Patient Chart — Diane Mercer (Caldwell Family Medicine Group)",
+      "doc_type": "chart",
+      "case": "B",
+      "file": "chart_case_B.md"
+    },
+    {
+      "doc_id": "pt_notes_B",
+      "title": "Harbor Point Physical Therapy — Treatment Record, Diane Mercer",
+      "doc_type": "pt_notes",
+      "case": "B",
+      "file": "pt_notes_case_B.md"
+    }
+  ]
+}
