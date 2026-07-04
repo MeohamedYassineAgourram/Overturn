@@ -6,6 +6,8 @@ import Worklist from "./components/Worklist";
 import TracePane from "./components/TracePane";
 import OutputPane from "./components/OutputPane";
 import CitationDrawer from "./components/CitationDrawer";
+import DocumentsModal from "./components/DocumentsModal";
+import { SettingsModal, HelpModal } from "./components/InfoModals";
 import { initialState, reducer } from "./state";
 import { CASE_META, PAYER } from "./caseMeta";
 import type { CaseInfo, Citation, EventType } from "./types";
@@ -32,6 +34,7 @@ export default function App() {
   const [tick, setTick] = useState(0);
   const [state, dispatch] = useReducer(reducer, initialState);
   const [drawer, setDrawer] = useState<{ docId: string; quote: string } | null>(null);
+  const [overlay, setOverlay] = useState<null | "documents" | "settings" | "help">(null);
   const esRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
@@ -91,28 +94,59 @@ export default function App() {
   };
 
   const openCitation = (c: Citation) => setDrawer({ docId: c.doc_id, quote: c.quote });
+  const viewDocument = (docId: string) => {
+    setOverlay(null);
+    setDrawer({ docId, quote: "" });
+  };
 
   const activeCase = cases.find((c) => c.id === selected);
   const claim = CASE_META[selected]?.claim ?? "";
 
+  const sidebar = (
+    <Sidebar
+      active={view}
+      onHome={backToWorklist}
+      onDocuments={() => setOverlay("documents")}
+      onSettings={() => setOverlay("settings")}
+      onHelp={() => setOverlay("help")}
+    />
+  );
+
+  const overlays = (
+    <>
+      <CitationDrawer docId={drawer?.docId ?? null} quote={drawer?.quote ?? ""} onClose={() => setDrawer(null)} />
+      {overlay === "documents" && <DocumentsModal onView={viewDocument} onClose={() => setOverlay(null)} />}
+      {overlay === "settings" && <SettingsModal onClose={() => setOverlay(null)} />}
+      {overlay === "help" && <HelpModal onClose={() => setOverlay(null)} />}
+    </>
+  );
+
   if (view === "worklist") {
     return (
       <div className="flex h-screen bg-page">
-        <Sidebar onHome={backToWorklist} />
+        {sidebar}
         <div className="flex min-w-0 flex-1 flex-col">
-          <Header mode="worklist" onBack={backToWorklist} onRerun={() => run(selected)} running={running} />
+          <Header
+            mode="worklist"
+            onBack={backToWorklist}
+            onRerun={() => run(selected)}
+            running={running}
+            cases={cases}
+            onOpenCase={openCase}
+          />
           <div className="min-h-0 flex-1 overflow-auto">
             <Worklist cases={cases} onOpen={openCase} />
           </div>
           <Footer />
         </div>
+        {overlays}
       </div>
     );
   }
 
   return (
     <div className="flex h-screen bg-page">
-      <Sidebar onHome={backToWorklist} />
+      {sidebar}
       <div className="flex min-w-0 flex-1 flex-col">
         <Header
           mode="case"
@@ -121,6 +155,8 @@ export default function App() {
           running={running}
           deadline={state.deadline}
           caseContext={activeCase ? { patient: activeCase.patient, claim } : undefined}
+          cases={cases}
+          onOpenCase={openCase}
         />
 
         {/* Email-origin framing — pure visual, implies the denial arrived by mail */}
@@ -147,7 +183,7 @@ export default function App() {
         <Footer />
       </div>
 
-      <CitationDrawer docId={drawer?.docId ?? null} quote={drawer?.quote ?? ""} onClose={() => setDrawer(null)} />
+      {overlays}
     </div>
   );
 }

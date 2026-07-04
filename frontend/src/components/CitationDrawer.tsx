@@ -62,10 +62,12 @@ export default function CitationDrawer({ docId, quote, onClose }: Props) {
             Close ✕
           </button>
         </header>
-        <div className="border-b border-line bg-accent-soft/40 px-5 py-2.5">
-          <div className="text-[11px] uppercase tracking-wider text-muted">Cited passage</div>
-          <p className="mt-1 text-xs italic text-accent">“{quote}”</p>
-        </div>
+        {quote && (
+          <div className="border-b border-line bg-accent-soft/40 px-5 py-2.5">
+            <div className="text-[11px] uppercase tracking-wider text-muted">Cited passage</div>
+            <p className="mt-1 text-xs italic text-accent">“{quote}”</p>
+          </div>
+        )}
         <div ref={scrollRef} className="flex-1 overflow-auto bg-page px-5 py-5">
           {loading && <div className="text-sm text-muted">Loading document…</div>}
           {doc && <DocumentArtifact docType={doc.doc_type} markdown={doc.markdown} quote={quote} />}
