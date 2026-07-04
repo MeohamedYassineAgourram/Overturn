@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html,
@@ -14,23 +14,35 @@ body,
 
 body {
   margin: 0;
-  background: #0f172a; /* slate-900 */
-  color: #e2e8f0; /* slate-200 */
+  background: #f4f5f7;
+  color: #181a1f;
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Thin, unobtrusive scrollbars for the panes */
+@layer components {
+  .card {
+    @apply rounded-2xl border border-line bg-white shadow-card;
+  }
+  .tag {
+    @apply rounded-md bg-page px-1.5 py-0.5 text-[10px] font-medium text-muted;
+  }
+  .monobox {
+    @apply rounded-lg border border-line bg-page px-2.5 py-2 font-mono text-[11px];
+  }
+}
+
+/* Soft, light scrollbars */
 *::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 *::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #e2e4e8;
   border-radius: 999px;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #cfd2d8;
 }
 
 @media (prefers-reduced-motion: reduce) {
