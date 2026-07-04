@@ -115,8 +115,8 @@ def _snippets(chunks, limit: int = 520) -> str:
 
 
 class AppealAgent:
-    def __init__(self) -> None:
-        self.index = RetrievalIndex()
+    def __init__(self, index: RetrievalIndex | None = None) -> None:
+        self.index = index or RetrievalIndex()
 
     async def run(self, case_id: str) -> AsyncIterator[TraceEvent]:
         try:
