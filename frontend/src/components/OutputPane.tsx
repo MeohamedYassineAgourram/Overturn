@@ -1,6 +1,7 @@
 import type { AppState } from "../state";
 import type { Citation } from "../types";
 import CitationChip from "./CitationChip";
+import ResolveGaps from "./ResolveGaps";
 import { IconDownload, IconQuestion } from "./icons";
 
 interface Props {
@@ -105,17 +106,7 @@ export default function OutputPane({ state, onOpenCitation }: Props) {
                 ))}
               </div>
 
-              <div className="mt-5">
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-muted">Evidence checklist</h4>
-                <ul className="mt-2 space-y-1.5">
-                  {gap.checklist?.map((item: string, i: number) => (
-                    <li key={i} className="flex items-start gap-2 text-[13px] text-slate-700">
-                      <span className="mt-0.5 h-4 w-4 shrink-0 rounded border border-slate-300" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <ResolveGaps gap={gap} ingest={plan?.ingest} deadline={state.deadline} />
             </div>
           </div>
         )}
@@ -124,25 +115,29 @@ export default function OutputPane({ state, onOpenCitation }: Props) {
       {/* Human-in-the-loop action bar */}
       <div className="flex items-center justify-between gap-3 border-t border-line bg-white px-6 py-3">
         <div className="text-[11px] text-muted">
-          {hasLetter ? "Review the draft, then approve to export." : gap ? "Resolve gaps, then re-run." : ""}
+          {hasLetter
+            ? "Review the draft, then approve to export."
+            : gap
+            ? "Generate a work order for records, then re-run once the evidence is in."
+            : ""}
         </div>
-        <div className="flex gap-2">
-          <button
-            disabled={!hasLetter}
-            className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-slate-600 hover:bg-page disabled:opacity-40"
-            title="Placeholder — routes to a human reviewer in production"
-          >
-            Request edits
-          </button>
-          <button
-            onClick={exportLetter}
-            disabled={!hasLetter}
-            className="flex items-center gap-1.5 rounded-lg bg-met px-4 py-2 text-xs font-semibold text-white shadow-card transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <IconDownload className="h-3.5 w-3.5" />
-            Approve &amp; Export
-          </button>
-        </div>
+        {hasLetter && (
+          <div className="flex gap-2">
+            <button
+              className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-slate-600 hover:bg-page"
+              title="Placeholder — routes to a human reviewer in production"
+            >
+              Request edits
+            </button>
+            <button
+              onClick={exportLetter}
+              className="flex items-center gap-1.5 rounded-lg bg-met px-4 py-2 text-xs font-semibold text-white shadow-card transition hover:bg-green-700"
+            >
+              <IconDownload className="h-3.5 w-3.5" />
+              Approve &amp; Export
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
